@@ -42,7 +42,7 @@ supply-chain-analytics/
 |Stage|What|Tools|
 |-|-|-|
 |1. Data Cleaning \& ETL|Deduplication, type fixes, handling missing/inconsistent geography and date fields, building an analysis-ready order table|Python (pandas)|
-|2. KPI Dashboard|On-time delivery rate, profit by region/category, order cycle time, late-delivery trend|Tableau|
+|2. KPI Dashboard|Built around one central flag: the overall late-delivery rate, broken down by Shipping Mode (revealed the core finding) and Market/Region (checked for concentration, found none). A world map was deliberately avoided for the regional view: since late rate is uniform across all 5 continents, a map would visually imply a geographic story that isn't actually there, adding noise without aiding any decision.|Tableau|
 |3. Demand Forecasting|Category-level time series forecast of order volume|Python (statsmodels / Prophet-style decomposition)|
 |4. Late-Delivery Risk Model|Classification model predicting late delivery from shipping mode, distance, category, order size|Python (scikit-learn, XGBoost) + SHAP for feature importance|
 |5. Inventory Optimization|Safety stock / reorder point recommendations using demand variability and lead-time assumptions|Python|
@@ -65,7 +65,12 @@ risk from **X% → Y%**
 
 ## Business Recommendations *(fill in once analysis is complete)*
 
-1. ...
+1. DataCo has two viable paths forward, with a real trade-off between them:
+
+   1. Option A — Reset the promise to match reality. Cheap and fast to implement, but doesn't improve actual delivery speed — it only changes what counts as "on time." Risk: customers paying a premium for "expedited" shipping may notice it no longer outpaces Standard Class, undermining trust in the tier itself.
+   2. Option B — Investigate and fix the fulfillment bottleneck. Addresses the root cause rather than the label, but is more expensive and slower to implement — and since the \~2x gap holds identically across all 5 continents, the fix likely isn't regional logistics, but something structural in fulfillment or carrier processes, which may be costly to change globally.
+
+      1. Given the evidence, a reasonable starting point is Option A as a short-term fix (immediately reduces the reported late-rate crisis) paired with Option B as a longer-term investigation — rather than treating them as mutually exclusive.
 2. ...
 3. ...
 
