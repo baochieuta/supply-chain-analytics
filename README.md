@@ -44,7 +44,7 @@ supply-chain-analytics/
 |1. Data Cleaning \& ETL|Deduplication, type fixes, handling missing/inconsistent geography and date fields, building an analysis-ready order table|Python (pandas)|
 |2. KPI Dashboard|Built around one central flag: the overall late-delivery rate, broken down by Shipping Mode (revealed the core finding) and Market/Region (checked for concentration, found none). A world map was deliberately avoided for the regional view: since late rate is uniform across all 5 continents, a map would visually imply a geographic story that isn't actually there, adding noise without aiding any decision.|Tableau|
 |3. Demand Forecasting|Category-level time series forecast of order volume|Python (statsmodels / Prophet-style decomposition)|
-|4. Late-Delivery Risk Model|Classification model predicting late delivery from shipping mode, distance, category, order size|Python (scikit-learn, XGBoost) + SHAP for feature importance|
+|4. Late-Delivery Risk Model|Built a baseline XGBoost classifier using two features surviving filter-method testing (Shipping Mode, payment Type), after excluding several strong-looking but invalid candidates: two data-leakage columns (Days for shipping (real), Delivery Status - both only knowable after an order ships) and one fraud-contaminated column (Order Status). Achieved 70% accuracy, 87% precision, 55% recall on the late class. Verified this is near the theoretical ceiling achievable with these two features (69.64%, calculated via majority-vote-per-group), confirming the model isn't undertrained - meaningful recall improvement requires new features, not further tuning. Noted as a scoped area for future iteration.|Python (scikit-learn, XGBoost) + SHAP for feature importance|
 |5. Inventory Optimization|Safety stock / reorder point recommendations using demand variability and lead-time assumptions|Python|
 
 ## Key Visuals
@@ -59,9 +59,8 @@ supply-chain-analytics/
 
 * Late-delivery rate: \*\***54.8%\*\*** overall after data is cleaned; highest in \*\***First class (95.3%)\*\* and \*\*Second class (76.6%)\*\* consistent across all region**
 * Primary driver: not fulfillment speed, but \*\*miscalibrated shipping promises\*\* — First Class (promised 1 day, actual \~2) and Second Class (promised 2 days, actual \~4) both consistently run \*\*\~2x\*\* their promised window, uniformly across all 5 markets
-* Forecasted demand for **\[category]** shows **\[trend/seasonality]**
-* Recommended safety stock adjustment: **\[+/- X%]** for **\[category]**, projected to reduce stockout
-risk from **X% → Y%**
+* The delivery-risk model correctly flags 87% of its "late" predictions, but only catches 55% of orders that are truly late -> a conservative model that under-flags real risk. Using the dataset's own profit gap (\~$0.78/order), the \~9,000 missed late orders in the test set represent an estimated $7,040 in direct margin impact, likely an underestimate given the larger real cost is probably customer retention, which this dataset can't measure directly.
+* Confirmed via a theoretical ceiling calculation that the model is already near-optimal given its current features (69.64% ceiling vs. 70% achieved) -> the constraint is feature richness, not model quality.
 
 ## Business Recommendations *(fill in once analysis is complete)*
 
@@ -79,7 +78,7 @@ risk from **X% → Y%**
 ```bash
 git clone https://github.com/<your-username>/supply-chain-analytics.git
 cd supply-chain-analytics
-python -m venv venv \&\& source venv/bin/activate    # or venv\\Scripts\\activate on Windows
+python -m venv venv \\\&\\\& source venv/bin/activate    # or venv\\\\Scripts\\\\activate on Windows
 pip install -r requirements.txt
 ```
 
